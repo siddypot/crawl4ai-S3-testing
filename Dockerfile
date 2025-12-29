@@ -4,10 +4,14 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies required for Playwright
-RUN apt-get update && apt-get install -y \
+# Set environment variables for Playwright
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Install system dependencies required for Playwright and general tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
-    gnupg \
     ca-certificates \
     fonts-liberation \
     libasound2 \
@@ -21,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     libnspr4 \
     libnss3 \
+    libnss3-dev \
     libwayland-client0 \
     libxcomposite1 \
     libxdamage1 \
@@ -30,31 +35,31 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     libu2f-udev \
     libvulkan1 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Copy requirements file
+# Copy requirements file first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
+# Install Python dependencies with upgrade
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers and dependencies
-# Set environment variable to install browsers to a writable location
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN mkdir -p /ms-playwright && \
-    python -m playwright install chromium && \
-    python -m playwright install-deps chromium
+# Create Playwright browsers directory with proper permissions
+RUN mkdir -p /ms-playwright && chmod 755 /ms-playwright
+
+# Install Playwright Chromium browser and system dependencies
+RUN python -m playwright install --with-deps chromium
 
 # Copy application code
 COPY crawler.py .
 COPY integrations.py .
 
-# Create data directory for output
-RUN mkdir -p /app/data
+# Create data directory for output with proper permissions
+RUN mkdir -p /app/data && chmod 755 /app/data
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import sys; sys.exit(0)"
 
 # Default command
 CMD ["python", "crawler.py"]
