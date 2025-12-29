@@ -36,11 +36,15 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright browsers and dependencies
-RUN playwright install chromium && \
-    playwright install-deps chromium
+# Set environment variable to install browsers to a writable location
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN mkdir -p /ms-playwright && \
+    python -m playwright install chromium && \
+    python -m playwright install-deps chromium
 
 # Copy application code
 COPY crawler.py .
