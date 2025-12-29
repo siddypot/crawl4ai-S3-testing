@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: college-crawler
+    volumes:
+      # Mount data directory to persist output files
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Override command if needed
+    # command: python crawler.py
+

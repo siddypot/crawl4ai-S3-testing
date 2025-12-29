@@ -1,0 +1,14 @@
+crawl4ai
+playwright
+# LangChain for RAG pipelines
+langchain
+langchain-community
+langchain-openai
+# Vector DB support
+sentence-transformers
+chromadb
+# Tokenization
+tiktoken
+# Optional: OpenAI for embeddings (can use local embeddings instead)
+openai
+
