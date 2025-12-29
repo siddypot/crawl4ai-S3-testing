@@ -1,24 +1,4 @@
 # Virtual Environment
-env/
-ENV/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-
-# Data files
-data/
-test_data/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
 # OS
 .DS_Store
 Thumbs.db
